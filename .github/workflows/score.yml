@@ -1,0 +1,32 @@
+name: 🎮 学习打卡
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查打卡
+        uses: actions/checkout@v3
+        
+      - name: 记录积分
+        run: |
+          # 获取用户
+          USER=${{ github.actor }}
+          
+          # 检查是否是打卡
+          if contains(github.event.issue.labels.*.name, '打卡'); then
+            echo "📝 用户 $USER 打卡成功 +5 积分"
+            # 更新积分文件
+          fi
+          
+      - name: 更新排行榜
+        run: |
+          # 更新排行榜
+          echo "更新积分..."
