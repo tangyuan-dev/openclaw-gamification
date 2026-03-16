@@ -1,160 +1,209 @@
-# 🎮 OpenClaw 游戏化学习系统
+# 🎮 OpenClaw 游戏化学习系统 V2
 
-让学习像玩游戏一样有趣！
+自动化追踪 · 自动生成 · 智能推送
 
-[![Stars](https://img.shields.io/github/stars/tangyuan-dev/openclaw-gamification?style=social)](https://github.com/tangyuan-dev/openclaw-gamification/stargazers)
+## 🎯 核心理念
 
-> 学习 OpenClaw 和 Vibe Coding，玩游戏升级！
+**自动** > 手动
 
-## 🎯 这是什么？
+- ✅ 自动追踪 GitHub 学习数据
+- ✅ 达成成就自动生成卡片
+- ✅ 自动推送到学员的渠道
 
-这是一个游戏化的编程学习系统，让学习 OpenClaw 变得有趣！
+---
 
-- 📚 **学教程** → 赚积分
-- 💬 **打卡** → 每日奖励
-- 🏆 **排行榜** → 比拼实力
-- 🎖️ **成就** → 解锁徽章
-
-## 🚀 快速开始
-
-### 1. 选择你的身份
+## 🔄 自动追踪流程
 
 ```
-🌱 新手 (0-50 分) — 刚入门
-📖 学徒 (51-200 分) — 在学习
-💻 开发者 (201-500 分) — 能实战
-🎓 导师 (501-1000 分) — 能教学
-🏆 大师 (1000+ 分) — 顶尖高手
+GitHub活动 → 自动记录 → 积分计算 → 成就检测 → 自动推送卡片
 ```
 
-### 2. 开始学习
+### 自动追踪的数据
+
+| 数据源 | 追踪内容 |
+|--------|---------|
+| GitHub Commits | 提交代码 +20分 |
+| GitHub Issues | 打卡 +5分 |
+| GitHub PR | 贡献教程 +50分 |
+| GitHub Stars | 获得关注 +1分 |
+
+---
+
+## 🎖️ 成就自动触发
+
+| 成就 | 条件 | 自动触发 |
+|------|------|---------|
+| 🌱 新手 | 注册 | 自动推送欢迎卡 |
+| 📖 学徒 | 100分 | 自动推送成就卡 |
+| 💻 开发者 | 200分 | 自动推送成就卡 |
+| 🔥 坚持者 | 7天连续 | 自动推送成就卡 |
+| 🎓 导师 | 500分 | 自动推送成就卡 |
+| 🏆 大师 | 1000分 | 自动推送成就卡 |
+
+---
+
+## 📤 自动推送渠道
+
+### 支持的渠道
+
+- 📱 Telegram
+- 💬 Discord  
+- �飞书
+- 📧 Email
+- 🐦 Twitter
+
+### 推送示例
+
+```
+🎉 恭喜！解锁新成就！
+
+🏅 成就：💻 开发者
+📊 当前积分：200
+🎖️ 成就进度：5/9
+
+[查看你的成就卡片]
+```
+
+---
+
+## 🛠️ 技术实现
+
+### 1. GitHub Webhook 自动记录
+
+```yaml
+# .github/workflows/tracker.yml
+name: 学习追踪
+
+on:
+  push:
+    branches: [main, master]
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened, merged]
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 记录学习活动
+        run: |
+          # 记录积分
+          echo "记录 activity..."
+          
+          # 更新数据库
+          curl -X POST ${{ secrets.API_URL }}/track \
+            -d "user=${{ github.actor }}&action=${{ github.event_name }}&points=${{ env.POINTS }}"
+```
+
+### 2. 自动检测成就
+
+```python
+# auto_badge.py
+def check_achievements(user_id):
+    user_data = get_user_data(user_id)
+    new_badges = []
+    
+    # 检查每个成就
+    for badge in BADGE_DEFINITIONS:
+        if badge not in user_data.badges:
+            if badge.condition(user_data.points):
+                new_badges.append(badge)
+                user_data.badges.append(badge)
+                
+                # 自动生成并推送卡片
+                generate_and_push_card(user_data, badge)
+    
+    save_user_data(user_data)
+    return new_badges
+```
+
+### 3. 自动生成卡片
+
+```python
+def generate_card(user_data, badge):
+    # 生成图片
+    img = create_achievement_card(
+        username=user_data.username,
+        points=user_data.points,
+        badge=badge,
+        streak=user_data.streak,
+        level=user_data.level
+    )
+    
+    # 推送到用户渠道
+    push_to_user(user_data, img)
+```
+
+---
+
+## 📊 成就卡片示例
+
+### 自动生成的卡片内容
+
+```
+┌─────────────────────────────┐
+│  🎉 新成就解锁！              │
+│                             │
+│  🏅 开发者                   │
+│  ─────────────────────      │
+│  👤 tangyuan-dev           │
+│  💰 200 积分                │
+│  🔥 7 天连续打卡             │
+│  ─────────────────────      │
+│  📊 5/9 成就                 │
+│                             │
+│  🎮 OpenClaw 游戏化学习     │
+└─────────────────────────────┘
+```
+
+---
+
+## 🚀 快速接入
+
+### 学员端
 
 ```bash
-# 1. Star 这个仓库
-# 2. Fork 学习教程
-# 3. 完成练习
-# 4. 提交打卡
+# 1. Fork 学习仓库
+git clone https://github.com/tangyuan-dev/openclaw-tutorials.git
+
+# 2. 开始学习
+# 自动追踪开始！
+
+# 3. 获得成就
+# 自动收到推送
 ```
 
-### 3. 赚积分
-
-| 任务 | 积分 | 操作 |
-|------|------|------|
-| 完成教程 | +10 | 提交 Issue |
-| 每日打卡 | +5 | 评论区打卡 |
-| 提交代码 | +20 | 提交 PR |
-| 帮助他人 | +15 | 回复 Issue |
-| 分享作品 | +30 | 提交作品 |
-
-### 4. 获得成就
-
-| 成就 | 条件 | 徽章 |
-|------|------|------|
-| 🌱 新手 | 注册 | 完成自我介绍 |
-| 📖 学徒 | 100分 | 完成5篇教程 |
-| 💻 开发者 | 200分 | 提交1个作品 |
-| 🔥 坚持者 | 300分 | 连续打卡7天 |
-| 🎓 导师 | 500分 | 帮助10人 |
-| 🏆 大师 | 1000分 | 排行榜前10 |
-
-## 📋 打卡方式
-
-### 方式 1：GitHub Issue 打卡
-
-1. 打开 [打卡 Issue](https://github.com/tangyuan-dev/openclaw-gamification/issues/new?template=checkin.md)
-2. 填写今日学习内容
-3. 提交即可获得积分
-
-### 方式 2：每日打卡评论
-
-在 [每日打卡 Issue](https://github.com/tangyuan-dev/openclaw-gamification/issues/1) 下评论即可
-
-## 🏆 排行榜
-
-每周更新！查看 [排行榜](./LEADERBOARD.md)
-
-```
-🥇 第1名: ??? - ???分
-🥈 第2名: ??? - ???分  
-🥉 第3名: ??? - ???分
-```
-
-## 🎖️ 成就展示
-
-### 基础成就
-
-- 🌱 新手 — 加入学习
-- 📖 学徒 — 完成入门
-- 💻 开发者 — 首次实战
-
-### 进阶成就
-
-- 🔥 坚持者 — 连续打卡
-- 🐛 修复者 — 提交 Bug
-- 📝 作者 — 贡献教程
-
-### 稀有成就
-
-- 🎓 导师 — 帮助他人
-- 🏆 大师 — 排行榜顶尖
-- 🌟 传奇 — 特殊贡献
-
-## 🎮 互动活动
-
-### 每周挑战
-
-| 周 | 挑战 | 奖励 |
-|----|------|------|
-| 第1周 | 完成 OpenClaw 安装 | +50分 |
-| 第2周 | 创建第一个 Skill | +50分 |
-| 第3周 | 接入一个渠道 | +50分 |
-| 第4周 | 开发一个作品 | +100分 |
-
-### 社区任务
-
-- 💬 回答问题 +15分
-- 📖 贡献教程 +50分
-- 🐛 提交 Bug +20分
-
-## 📦 工具
-
-### 积分查询
+### 管理员端
 
 ```bash
-# 查看积分
-gh issue list --repo tangyuan-dev/openclaw-gamification --label积分
+# 部署追踪服务
+docker run -d -p 3000:3000 \
+  -e GITHUB_TOKEN=$TOKEN \
+  -e DATABASE_URL=$URL \
+  openclaw-gamification-server
 ```
 
-### 自动记录
+---
 
-我们提供自动记录脚本：
+## 📦 相关仓库
 
-```bash
-# 克隆工具
-git clone https://github.com/tangyuan-dev/openclaw-gamification-tools.git
+- [openclaw-gamification](https://github.com/tangyuan-dev/openclaw-gamification) — 游戏化系统
+- [openclaw-gamification-tools](https://github.com/tangyuan-dev/openclaw-gamification-tools) — 工具集
+- [openclaw-gamification-server](https://github.com/tangyuan-dev/openclaw-gamification-server) — 自动追踪服务（开发中）
 
-# 运行
-./checkin.sh --user your-github-username
-```
+---
 
-## 🤝 贡献
+## 🎮 立即加入
 
-欢迎贡献！
-
-1. Fork 本仓库
-2. 添加新功能
-3. 提交 PR
-
-## 📄 License
-
-MIT License
+1. ⭐ Star 本系统
+2. 📚 开始学习教程
+3. 🎉 自动获得成就
 
 ---
 
 <div align="center">
 
-**🎮 一起玩转 OpenClaw！**
-
-⭐ Star 支持，一起学习！
+**让学习像玩游戏一样有趣！**
 
 </div>
